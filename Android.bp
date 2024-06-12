@@ -26,7 +26,7 @@ qtidisplay_cc_defaults {
         "libcutils",
         "libutils",
     ],
-    header_libs: ["display_headers"],
+    header_libs: ["display_headers", "generated_kernel_headers"],
     soong_config_variables: {
         drmpp: {
             cflags: ["-DPP_DRM_ENABLE"],
