@@ -30,7 +30,7 @@
 
 # Changes from Qualcomm Innovation Center are provided under the following license:
 #
-# Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+# Copyright (c) 2022,2024 Qualcomm Innovation Center, Inc. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted (subject to the limitations in the
@@ -87,6 +87,10 @@ case "$target" in
         setprop vendor.display.enable_rounded_corner 1
         setprop vendor.display.disable_rounded_corner_thread 0
         setprop vendor.display.enable_rc_support 1
+        setprop vendor.display.enable_perf_hint_large_comp_cycle 1
+        ;;
+        417|420|444|445)
+        # Set property for bengal
         setprop vendor.display.enable_perf_hint_large_comp_cycle 1
         ;;
     esac
