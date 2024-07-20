@@ -30,7 +30,7 @@
 /*
 * Changes from Qualcomm Innovation Center are provided under the following license:
 *
-* Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+* Copyright (c) 2022, 2024 Qualcomm Innovation Center, Inc. All rights reserved.
 * SPDX-License-Identifier: BSD-3-Clause-Clear
 */
 
@@ -300,7 +300,7 @@ void HWCToneMapper::DumpToneMapOutput(ToneMapSession *session, shared_ptr<Fence>
   Fence::Wait(acquire_fd);
 
   void *base_ptr = NULL;
-  error = buffer_allocator_->MapBuffer(target_buffer, acquire_fd, base_ptr);
+  error = buffer_allocator_->MapBuffer(target_buffer, acquire_fd, &base_ptr);
   if (error != 0) {
     DLOGE("MapBuffer failed, base addr = %p", base_ptr);
     return;
