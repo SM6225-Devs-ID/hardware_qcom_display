@@ -25,6 +25,11 @@
 * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*
+* Changes from Qualcomm Innovation Center are provided under the following license:
+*
+* Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause-Clear
 */
 
 #ifndef __HW_EVENTS_DRM_H__
@@ -112,6 +117,8 @@ class HWEventsDRM : public HWEventsInterface {
   bool disable_hw_recovery_ = false;
   bool enable_hist_interrupt_ = false;
   uint32_t hw_recovery_index_ = UINT32_MAX;
+  std::mutex hw_events_mutex_; // To protect hw_events_drm_
+  static HWEventsDRM *hw_events_drm_;
 };
 
 }  // namespace sdm

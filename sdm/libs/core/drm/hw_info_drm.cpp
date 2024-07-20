@@ -30,7 +30,7 @@
 /*
 * Changes from Qualcomm Innovation Center are provided under the following license:
 *
-* Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+* Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted (subject to the limitations in the
@@ -841,9 +841,20 @@ void HWInfoDRM::GetSDMFormat(uint32_t drm_format, uint64_t drm_format_modifier,
 }
 
 DisplayError HWInfoDRM::GetFirstDisplayInterfaceType(HWDisplayInterfaceInfo *hw_disp_info) {
-  hw_disp_info->type = kBuiltIn;
-  hw_disp_info->is_connected = true;
 
+  HWDisplaysInfo hw_displays_info;
+  DisplayError error = kErrorNone;
+  error = GetDisplaysStatus(&hw_displays_info);
+  if (error != kErrorNone) {
+    return error;
+  }
+  for (auto &iter : hw_displays_info) {
+    auto &info = iter.second;
+    if (info.is_primary) {
+        hw_disp_info->type = info.display_type;
+        hw_disp_info->is_connected = info.is_connected;
+    }
+  }
   return kErrorNone;
 }
 

@@ -768,7 +768,7 @@ int DRMConnector::GetInfo(DRMConnectorInfo *info) {
     DRM_LOGW("Zero modes on connector %u.", conn_id);
   }
 
-  if (!drm_connector_->modes) {
+  if (!drm_connector_->modes && drm_connector_->count_modes) {
     DLOGW("Connector %u not found.", conn_id);
     return 0;
   }

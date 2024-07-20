@@ -1,6 +1,5 @@
 /*
  * Copyright (c) 2011-2021, The Linux Foundation. All rights reserved.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
@@ -191,15 +190,15 @@ bool IsCompressedRGBFormat(int format) {
 }
 
 bool IsCameraCustomFormat(int format) {
-  switch (format) {
-    case HAL_PIXEL_FORMAT_NV21_ZSL:
-      if (CameraInfo::GetInstance() &&
+  if (CameraInfo::GetInstance() &&
           !(CameraInfo::GetInstance()->IsCameraUtilsPresent())) {
         // If the mapping is made to a camera custom format and lib
         // is absent, we return false and handle internally.
         return false;
       }
-      [[fallthrough]];
+
+  switch (format) {
+    case HAL_PIXEL_FORMAT_NV21_ZSL:
     case HAL_PIXEL_FORMAT_NV12_UBWC_FLEX:
     case HAL_PIXEL_FORMAT_NV12_UBWC_FLEX_2_BATCH:
     case HAL_PIXEL_FORMAT_NV12_UBWC_FLEX_4_BATCH:
@@ -442,6 +441,9 @@ unsigned int GetSize(const BufferInfo &info, unsigned int alignedw, unsigned int
         }
         size = ALIGN(alignedw * alignedh * 2, SIZE_4K);
         break;
+      case HAL_PIXEL_FORMAT_NV12_LINEAR_FLEX:
+        size = MMM_COLOR_FMT_BUFFER_SIZE(MMM_COLOR_FMT_NV12, width, height);
+        break;
       case HAL_PIXEL_FORMAT_YCbCr_420_SP_VENUS:
       case HAL_PIXEL_FORMAT_NV12_ENCODEABLE:
         mmm_color_format = (usage & GRALLOC_USAGE_PRIVATE_HEIF) ? MMM_COLOR_FMT_NV12_512 :
@@ -453,8 +455,10 @@ unsigned int GetSize(const BufferInfo &info, unsigned int alignedw, unsigned int
         size = MMM_COLOR_FMT_BUFFER_SIZE(MMM_COLOR_FMT_NV21, width, height);
         break;
       case HAL_PIXEL_FORMAT_BLOB:
+      case HAL_PIXEL_FORMAT_RAW_OPAQUE:
         if (height != 1) {
-          ALOGE("%s: Buffers with HAL_PIXEL_FORMAT_BLOB must have height 1 ", __FUNCTION__);
+          ALOGE("%s: Buffers with HAL_PIXEL_FORMAT_BLOB and"
+                "HAL_PIXEL_FORMAT_RAW_OPAQUE must have height 1 ", __FUNCTION__);
           return 0;
         }
         size = (unsigned int) width;
@@ -619,6 +623,10 @@ void GetYuvSPPlaneInfo(const BufferInfo &info, int format, uint32_t width, uint3
       c_height = height;
       break;
 #ifndef QMAA
+    case HAL_PIXEL_FORMAT_NV12_LINEAR_FLEX:
+      c_height = MMM_COLOR_FMT_UV_SCANLINES(MMM_COLOR_FMT_NV12, height);
+      c_size = c_stride * c_height;
+      break;
     case HAL_PIXEL_FORMAT_YCbCr_420_SP_VENUS:
     case HAL_PIXEL_FORMAT_NV12_ENCODEABLE:
       mmm_color_format = (info.usage & GRALLOC_USAGE_PRIVATE_HEIF) ? MMM_COLOR_FMT_NV12_512 :
@@ -1229,6 +1237,10 @@ int GetAlignedWidthAndHeight(const BufferInfo &info, unsigned int *alignedw,
                                                                 MMM_COLOR_FMT_P010;
       aligned_w = INT(MMM_COLOR_FMT_Y_STRIDE(mmm_color_format, width) / 2);
       aligned_h = INT(MMM_COLOR_FMT_Y_SCANLINES(mmm_color_format, height));
+      break;
+    case HAL_PIXEL_FORMAT_NV12_LINEAR_FLEX:
+      aligned_w = INT(MMM_COLOR_FMT_Y_STRIDE(MMM_COLOR_FMT_NV12, width));
+      aligned_h = INT(MMM_COLOR_FMT_Y_SCANLINES(MMM_COLOR_FMT_NV12, height));
       break;
     case HAL_PIXEL_FORMAT_YCbCr_420_SP_VENUS:
     case HAL_PIXEL_FORMAT_NV12_ENCODEABLE:

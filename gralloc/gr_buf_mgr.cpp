@@ -95,6 +95,16 @@ static BufferInfo GetBufferInfo(const BufferDescriptor &descriptor) {
                     descriptor.GetUsage());
 }
 
+static uint64_t isCameraRecLowResolution(BufferInfo info) {
+  if ((info.usage & GRALLOC_USAGE_HW_VIDEO_ENCODER) &&
+       (info.usage & GRALLOC_USAGE_HW_CAMERA_WRITE)) {
+    if (info.width < 640 || info.height < 480) {
+      return true;
+    }
+  }
+  return false;
+}
+
 static uint64_t getMetaDataSize(uint64_t reserved_region_size) {
 // Only include the reserved region size when using Metadata_t V2
 #ifndef METADATA_V2
@@ -847,6 +857,10 @@ int BufferManager::GetCustomDimensions(private_handle_t *hnd, int *stride, int *
 BufferManager::BufferManager() : next_id_(0) {
   handles_map_.clear();
   allocator_ = new Allocator();
+  property_get("ro.board.platform", target_board_platform_, "0");
+  if (!strncmp(target_board_platform_, "trinket", 7)) {
+    isCameraRecLowResolutionFormatOverride_ = true;
+  }
 }
 
 BufferManager *BufferManager::GetInstance() {
@@ -898,6 +912,9 @@ Error BufferManager::FreeBuffer(std::shared_ptr<Buffer> buf) {
 Error BufferManager::ValidateBufferSize(private_handle_t const *hnd, BufferInfo info) {
   unsigned int size, alignedw, alignedh;
   info.format = GetImplDefinedFormat(info.usage, info.format);
+  if (isCameraRecLowResolutionFormatOverride_ && isCameraRecLowResolution(info)) {
+    info.format = HAL_PIXEL_FORMAT_YCbCr_420_SP_VENUS;
+  }
   int ret = GetBufferSizeAndDimensions(info, &size, &alignedw, &alignedh);
   if (ret < 0) {
     return Error::BAD_BUFFER;
@@ -1145,6 +1162,11 @@ Error BufferManager::AllocateBuffer(const BufferDescriptor &descriptor, buffer_h
     return Error::BAD_BUFFER;
   std::lock_guard<std::mutex> buffer_lock(buffer_lock_);
 
+  uint64_t reserved_size = descriptor.GetReservedSize();
+  if (reserved_size + sizeof(MetaData_t) + getpagesize() >= UINT32_MAX) {
+    return Error::UNSUPPORTED;
+  }
+
   uint64_t usage = descriptor.GetUsage();
   int format = GetImplDefinedFormat(usage, descriptor.GetFormat());
   uint32_t layer_count = descriptor.GetLayerCount();
@@ -1155,6 +1177,9 @@ Error BufferManager::AllocateBuffer(const BufferDescriptor &descriptor, buffer_h
 
   int buffer_type = GetBufferType(format);
   BufferInfo info = GetBufferInfo(descriptor);
+  if (isCameraRecLowResolutionFormatOverride_ && isCameraRecLowResolution(info)) {
+    format = HAL_PIXEL_FORMAT_YCbCr_420_SP_VENUS;
+  }
   info.format = format;
   info.layer_count = layer_count;
 

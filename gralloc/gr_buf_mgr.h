@@ -63,6 +63,7 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <cutils/properties.h>
 
 #include "gr_allocator.h"
 #include "gr_buf_descriptor.h"
@@ -140,6 +141,8 @@ class BufferManager {
   uint64_t allocated_ = 0;
   uint64_t kAllocThreshold = (uint64_t)2*1024*1024*1024;
   uint64_t kMemoryOffset = 50*1024*1024;
+  char target_board_platform_[PROP_VALUE_MAX] = {'\0'};
+  bool isCameraRecLowResolutionFormatOverride_ = false;
   struct {
     const char *kDumpFile = "/data/misc/wmtrace/bufferdump.txt";
     uint64_t position = 0;

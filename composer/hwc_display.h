@@ -20,7 +20,7 @@
 /*
  * Changes from Qualcomm Innovation Center are provided under the following license:
  *
- * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted (subject to the limitations in the
@@ -601,6 +601,7 @@ class HWCDisplay : public DisplayEventHandler {
   hwc_region_t client_damage_region_ = {};
   bool display_idle_ = false;
   bool enable_poms_during_doze_ = false;
+  DisplayNullExternal display_null_;
 
  private:
   void DumpInputBuffers(void);
